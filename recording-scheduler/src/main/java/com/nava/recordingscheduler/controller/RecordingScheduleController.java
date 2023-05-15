@@ -1,5 +1,6 @@
 package com.nava.recordingscheduler.controller;
 
+import com.nava.recordingscheduler.service.LogService;
 import com.nava.recordingscheduler.service.ScheduleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +20,11 @@ import java.util.Objects;
 @Controller
 public class RecordingScheduleController {
     private final ScheduleService scheduleService;
+    private final LogService logService;
 
-    public RecordingScheduleController(ScheduleService scheduleService) {
+    public RecordingScheduleController(ScheduleService scheduleService, LogService logService) {
         this.scheduleService = scheduleService;
+        this.logService = logService;
     }
 
     @GetMapping("/")
@@ -52,8 +55,8 @@ public class RecordingScheduleController {
     @PostMapping("/record")
     public String scheduleRecord(@RequestParam("channelID") String channelID,
                                  @RequestParam("txDayDate") String txDayDate,
-                                 @RequestParam("startTime") String startTime) {
-        System.out.println(channelID + " " + txDayDate + " " + startTime);
+                                 @RequestParam("startTime") String startTime) throws IOException {
+        logService.addLogLine(channelID + " " + txDayDate + " " + startTime + "\n");
         scheduleService.disableEvent(startTime);
         return "redirect:/";
     }
