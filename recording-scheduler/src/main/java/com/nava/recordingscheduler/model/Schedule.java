@@ -1,6 +1,7 @@
 package com.nava.recordingscheduler.model;
 
 import lombok.*;
+
 import java.util.List;
 
 @NoArgsConstructor

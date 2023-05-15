@@ -12,4 +12,5 @@ public class Event {
     private String requestType;
     private String seriesTitle;
     private String programmeTitle;
+    private boolean recordable;
 }

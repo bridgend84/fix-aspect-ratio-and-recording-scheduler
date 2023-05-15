@@ -26,7 +26,7 @@ public class RecordingScheduleController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("schedule", scheduleService.getSchedule());
+        model.addAttribute("schedule", scheduleService.getSchedule("Main"));
         return "index";
     }
 
@@ -46,6 +46,15 @@ public class RecordingScheduleController {
         Files.copy(scheduleFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
         File file = new File("src/main/resources/" + fileName);
         scheduleService.setSchedule(file);
+        return "redirect:/";
+    }
+
+    @PostMapping("/record")
+    public String scheduleRecord(@RequestParam("channelID") String channelID,
+                                 @RequestParam("txDayDate") String txDayDate,
+                                 @RequestParam("startTime") String startTime) {
+        System.out.println(channelID + " " + txDayDate + " " + startTime);
+        scheduleService.disableEvent(startTime);
         return "redirect:/";
     }
 }
