@@ -9,6 +9,8 @@ import lombok.*;
 @Setter
 public class Event {
     private String startTime;
+    private String tcIn;
+    private String tcOut;
     private String requestType;
     private String seriesTitle;
     private String programmeTitle;

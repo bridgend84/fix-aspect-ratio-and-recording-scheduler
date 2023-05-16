@@ -40,7 +40,7 @@
                     <td th:text="${event.programmeTitle}"></td>
                     <td>
                         <form action="#"
-                              th:action="@{/record(channelID=${schedule.channelID},txDayDate=${schedule.txDayDate},startTime=${event.startTime})}" method="post">
+                              th:action="@{/record(channelID=${schedule.channelID},txDayDate=${schedule.txDayDate},startTime=${event.startTime},tcIn=${event.tcIn},tcOut=${event.tcOut})}" method="post">
                             <button type="submit" class="btn btn-danger" th:disabled="${!event.recordable}">Record</button>
                         </form>
                     </td>

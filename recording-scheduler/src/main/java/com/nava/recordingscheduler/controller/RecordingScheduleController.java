@@ -55,8 +55,10 @@ public class RecordingScheduleController {
     @PostMapping("/record")
     public String scheduleRecord(@RequestParam("channelID") String channelID,
                                  @RequestParam("txDayDate") String txDayDate,
-                                 @RequestParam("startTime") String startTime) throws IOException {
-        logService.addLogLine(channelID + " " + txDayDate + " " + startTime + "\n");
+                                 @RequestParam("startTime") String startTime,
+                                 @RequestParam("tcIn") String tcIn,
+                                 @RequestParam("tcOut") String tcOut) throws IOException {
+        logService.addLogLine(channelID + " " + txDayDate + " " + startTime + " " + tcIn + " " + tcOut +"\n");
         scheduleService.disableEvent(startTime);
         return "redirect:/";
     }
