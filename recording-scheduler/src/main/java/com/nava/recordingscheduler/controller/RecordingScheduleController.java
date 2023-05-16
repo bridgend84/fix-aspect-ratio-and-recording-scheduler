@@ -2,6 +2,7 @@ package com.nava.recordingscheduler.controller;
 
 import com.nava.recordingscheduler.service.LogService;
 import com.nava.recordingscheduler.service.ScheduleService;
+import com.nava.recordingscheduler.service.ScheduledRecordingService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -21,10 +22,14 @@ import java.util.Objects;
 public class RecordingScheduleController {
     private final ScheduleService scheduleService;
     private final LogService logService;
+    private final ScheduledRecordingService scheduledRecordingService;
 
-    public RecordingScheduleController(ScheduleService scheduleService, LogService logService) {
+    public RecordingScheduleController(ScheduleService scheduleService,
+                                       LogService logService,
+                                       ScheduledRecordingService scheduledRecordingService) {
         this.scheduleService = scheduleService;
         this.logService = logService;
+        this.scheduledRecordingService = scheduledRecordingService;
     }
 
     @GetMapping("/")
@@ -56,9 +61,9 @@ public class RecordingScheduleController {
     public String scheduleRecord(@RequestParam("channelID") String channelID,
                                  @RequestParam("txDayDate") String txDayDate,
                                  @RequestParam("startTime") String startTime,
-                                 @RequestParam("tcIn") String tcIn,
-                                 @RequestParam("tcOut") String tcOut) throws IOException {
-        logService.addLogLine(channelID + " " + txDayDate + " " + startTime + " " + tcIn + " " + tcOut +"\n");
+                                 @RequestParam("durationTC") String durationTC) {
+        scheduledRecordingService.addRecordingTask(channelID, startTime, durationTC);
+        logService.logRegisterRecord(channelID, txDayDate, startTime, durationTC);
         scheduleService.disableEvent(startTime);
         return "redirect:/";
     }

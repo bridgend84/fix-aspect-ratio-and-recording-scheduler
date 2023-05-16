@@ -56,11 +56,11 @@ public class ScheduleService {
                         .map(eventDTO -> Event
                                 .builder()
                                 .startTime(eventDTO.getStart().get("startTime"))
-                                .tcIn(eventDTO.getStart().get("tcin"))
-                                .tcOut(eventDTO.getStart().get("tcout"))
+                                .durationTC(eventDTO.getStart().get("durationTC"))
                                 .requestType(eventDTO.getProgrammeProperties().get("requestType"))
                                 .seriesTitle(eventDTO.getProgrammeProperties().get("seriesTitle"))
                                 .programmeTitle(eventDTO.getProgrammeProperties().get("programmeTitle"))
+                                .FPS(eventDTO.getFPS())
                                 .recordable(true)
                                 .build())
                         .toList())

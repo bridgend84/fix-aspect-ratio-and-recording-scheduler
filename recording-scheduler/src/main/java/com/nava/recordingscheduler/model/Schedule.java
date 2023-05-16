@@ -12,6 +12,5 @@ import java.util.List;
 public class Schedule {
     private String txDayDate;
     private String channelID;
-    private int alternative;
     private List<Event> events;
 }

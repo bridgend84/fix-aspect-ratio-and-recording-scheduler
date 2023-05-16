@@ -9,15 +9,46 @@ import java.nio.file.StandardOpenOption;
 
 @Service
 public class LogService {
-    Path path = Path.of("src/main/resources/log.txt");
+    public String loggingFilePathString;
+    private final Path loggingFilePath;
 
-    public LogService() throws IOException {
-        if (!Files.exists(path)) {
-            Files.createFile(path);
+    public LogService(String loggingFilePathString) {
+        this.loggingFilePathString = loggingFilePathString;
+        this.loggingFilePath = Path.of(loggingFilePathString);
+        createLogFile();
+    }
+
+    private void createLogFile() {
+        try {
+            if (!Files.exists(loggingFilePath)) {
+                Files.createFile(loggingFilePath);
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
-    public void addLogLine(String line) throws IOException {
-        Files.write(path, line.getBytes(), StandardOpenOption.APPEND);
+    private void addLogLine(String line) {
+        try {
+            Files.write(loggingFilePath, line.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void logRegisterRecord(String channelID,
+                                  String txDayDate,
+                                  String startTime,
+                                  String durationTC) {
+        String logLine = "RECORD_REG - CH_ID: " +
+                channelID +
+                " TX_DAY_DATE: " +
+                txDayDate +
+                " START_TIME: " +
+                startTime +
+                " DURATION_TC: " +
+                durationTC +
+                ";";
+        addLogLine(logLine);
     }
 }

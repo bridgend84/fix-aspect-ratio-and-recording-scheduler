@@ -1,7 +1,8 @@
 package com.nava.recordingscheduler.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.codehaus.jackson.annotate.JsonIgnore;
+
 
 import java.util.Map;
 
@@ -12,8 +13,7 @@ import java.util.Map;
 @Setter
 public class EventDTO {
     private Map<String, String> start;
-    @JsonIgnore
-    private Map<String, Object> technical;
+    private TechnicalDTO technical;
     @JsonIgnore
     private Map<String, Object> secondaryEventList;
     private Map<String, String> programmeProperties;
@@ -21,4 +21,8 @@ public class EventDTO {
     private Map<String, Object> source;
     @JsonIgnore
     private Map<String, Object> caflagList;
+
+    public int getFPS() {
+        return this.technical.getFramePerSec();
+    }
 }
