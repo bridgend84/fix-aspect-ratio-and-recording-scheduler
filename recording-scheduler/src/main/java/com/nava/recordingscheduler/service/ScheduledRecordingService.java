@@ -19,6 +19,7 @@ import java.util.*;
 
 @Service
 public class ScheduledRecordingService {
+    private static final int HOURS_PER_DAY = 24;
 
     private final ScheduleService scheduleService;
 
@@ -30,10 +31,10 @@ public class ScheduledRecordingService {
     @Value("${recording.stop.url}")
     private String stopUrlWithoutChId;
 
-    @Value("${recording.puffer.minutes.before}")
+    @Value("${recording.puffer.before}")
     private String pufferBefore;
 
-    @Value("${recording.puffer.minutes.after}")
+    @Value("${recording.puffer.after}")
     private String pufferAfter;
 
     private final FrameRate fps;
@@ -53,13 +54,20 @@ public class ScheduledRecordingService {
                     .builder()
                     .isRecording(false)
                     .currentRecordingTask(null)
-                    .recordingTasks(new TreeSet<>((a, b) -> TimecodeOperations
-                            .subtract(a.getStartTime(), b.getStartTime()).getFrames()))
+                    .recordingTasks(new TreeSet<>(
+                            Comparator.comparing(recordingTask ->
+                                    convertToLocalDateTime(
+                                            recordingTask.getScheduleDay(),
+                                            recordingTask.getStartTime()))))
                     .build());
         }
-        channelRecorders.get(scheduleService.getChannelId()).addRecordingTask(RecordingTask
+        channelRecorders.get(scheduleService.getChannelId()).addRecordingTask(
+                RecordingTask
                 .builder()
-                .scheduleDay(scheduleService.getScheduleDay())
+                .scheduleDay(scheduleService
+                        .getScheduleDay()
+                        .plusDays(TimecodeOperations.fromTimecodeString(
+                                event.getStartTime(), fps).getHours() / HOURS_PER_DAY))
                 .startTime(
                         TimecodeOperations.subtract(
                                 TimecodeOperations.fromTimecodeString(event.getStartTime(), fps),
@@ -137,8 +145,8 @@ public class ScheduledRecordingService {
         LocalDateTime taskLocalDateTime = LocalDateTime.of(
                 scheduleDay.getYear(),
                 scheduleDay.getMonth(),
-                scheduleDay.getDayOfMonth(),
-                timeCode.getHours(),
+                scheduleDay.getDayOfMonth() + timeCode.getHours() / 24,
+                timeCode.getHours() % 24,
                 timeCode.getMinutes(),
                 timeCode.getSeconds());
         return LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).equals(taskLocalDateTime);
@@ -148,8 +156,8 @@ public class ScheduledRecordingService {
         return LocalDateTime.of(
                 scheduleDay.getYear(),
                 scheduleDay.getMonth(),
-                scheduleDay.getDayOfMonth(),
-                timeCode.getHours(),
+                scheduleDay.getDayOfMonth() + timeCode.getHours() / 24,
+                timeCode.getHours() % 24,
                 timeCode.getMinutes(),
                 timeCode.getSeconds());
     }
