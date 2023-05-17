@@ -3,6 +3,7 @@ package com.nava.recordingscheduler.model;
 import lombok.*;
 import org.moormanity.smpte.timecode.TimecodeRecord;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class RecordingTask {
+    private LocalDateTime scheduleDay;
     private TimecodeRecord startTime;
     private TimecodeRecord stopTime;
 
@@ -19,11 +21,11 @@ public class RecordingTask {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RecordingTask that = (RecordingTask) o;
-        return Objects.equals(startTime, that.startTime) && Objects.equals(stopTime, that.stopTime);
+        return Objects.equals(scheduleDay, that.scheduleDay) && Objects.equals(startTime, that.startTime) && Objects.equals(stopTime, that.stopTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startTime, stopTime);
+        return Objects.hash(scheduleDay, startTime, stopTime);
     }
 }

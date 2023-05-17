@@ -1,5 +1,6 @@
 package com.nava.recordingscheduler.service;
 
+import com.nava.recordingscheduler.model.Event;
 import com.nava.recordingscheduler.model.Recorder;
 import com.nava.recordingscheduler.model.RecordingTask;
 import org.moormanity.smpte.timecode.FrameRate;
@@ -8,10 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
 public class ScheduledRecordingService {
+
+    private final ScheduleService scheduleService;
+
     @Value("${recording.start.url}")
     private String startUrlWithoutChId;
 
@@ -28,31 +33,33 @@ public class ScheduledRecordingService {
 
     private final Map<String, Recorder> channelRecorders;
 
-    public ScheduledRecordingService(FrameRate fps) {
+    public ScheduledRecordingService(ScheduleService scheduleService, FrameRate fps) {
         this.channelRecorders = new HashMap<>();
+        this.scheduleService = scheduleService;
         this.fps = fps;
     }
 
-    public void addRecordingTask(String channelId, String startTime, String durationTC) {
-        if (!channelRecorders.containsKey(channelId)) {
-            channelRecorders.put(channelId, Recorder
+    public void addRecordingTask(Event event) {
+        if (!channelRecorders.containsKey(scheduleService.getChannelId())) {
+            channelRecorders.put(scheduleService.getChannelId(), Recorder
                     .builder()
                     .isRecording(false)
-                    .recordStarted(null)
+                    .currentRecordingTask(null)
                     .recordingTasks(new TreeSet<>((a, b) -> TimecodeOperations
                             .subtract(a.getStartTime(), b.getStartTime()).getFrames()))
                     .build());
         }
-        channelRecorders.get(channelId).addRecordingTask(RecordingTask
+        channelRecorders.get(scheduleService.getChannelId()).addRecordingTask(RecordingTask
                 .builder()
+                .scheduleDay(scheduleService.getScheduleDay())
                 .startTime(
                         TimecodeOperations.subtract(
-                                TimecodeOperations.fromTimecodeString(startTime, fps),
+                                TimecodeOperations.fromTimecodeString(event.getStartTime(), fps),
                                 TimecodeOperations.fromTimecodeString(pufferBefore, fps)))
                 .stopTime(TimecodeOperations.add(
                         TimecodeOperations.add(
-                                TimecodeOperations.fromTimecodeString(startTime, fps),
-                                TimecodeOperations.fromTimecodeString(durationTC, fps)
+                                TimecodeOperations.fromTimecodeString(event.getStartTime(), fps),
+                                TimecodeOperations.fromTimecodeString(event.getDurationTC(), fps)
                         ),
                         TimecodeOperations.fromTimecodeString(pufferAfter, fps)
                 ))
@@ -63,6 +70,7 @@ public class ScheduledRecordingService {
     public void printRecordingSchedule() {
         if (channelRecorders.containsKey("D1")) {
             channelRecorders.get("D1").getRecordingTasks().forEach(r -> {
+                System.out.println(r.getScheduleDay().format(DateTimeFormatter.ISO_DATE));
                 System.out.println(TimecodeOperations.toTimecodeString(r.getStartTime()));
                 System.out.println(TimecodeOperations.toTimecodeString(r.getStopTime()));
             });

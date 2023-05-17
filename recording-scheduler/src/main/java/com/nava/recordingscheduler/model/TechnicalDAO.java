@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class TechnicalDTO {
+public class TechnicalDAO {
     @JsonIgnore
     private String audioMode;
     private int framePerSec;

@@ -11,9 +11,9 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
-public class EventDTO {
+public class EventDAO {
     private Map<String, String> start;
-    private TechnicalDTO technical;
+    private TechnicalDAO technical;
     @JsonIgnore
     private Map<String, Object> secondaryEventList;
     private Map<String, String> programmeProperties;

@@ -12,9 +12,17 @@ public class Config {
     @Value("${recording.logfile.path}")
     public String recordingLogfilePath;
 
+    @Value("${schedule.json.path}")
+    public String scheduleJsonPath;
+
     @Bean
     public String loggingFilePathString() {
         return recordingLogfilePath;
+    }
+
+    @Bean
+    public String scheduleJsonPathString() {
+        return scheduleJsonPath;
     }
 
     @Bean

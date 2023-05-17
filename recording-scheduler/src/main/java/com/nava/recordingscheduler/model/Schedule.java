@@ -2,6 +2,7 @@ package com.nava.recordingscheduler.model;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -10,7 +11,8 @@ import java.util.List;
 @Getter
 @Setter
 public class Schedule {
-    private String txDayDate;
+    private LocalDateTime txDayDate;
+    private String formattedTxDayDate;
     private String channelID;
     private List<Event> events;
 }

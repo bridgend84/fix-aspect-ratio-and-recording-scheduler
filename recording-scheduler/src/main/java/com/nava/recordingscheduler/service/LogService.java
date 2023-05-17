@@ -1,5 +1,6 @@
 package com.nava.recordingscheduler.service;
 
+import com.nava.recordingscheduler.model.Event;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -11,10 +12,12 @@ import java.nio.file.StandardOpenOption;
 public class LogService {
     public String loggingFilePathString;
     private final Path loggingFilePath;
+    private final ScheduleService scheduleService;
 
-    public LogService(String loggingFilePathString) {
+    public LogService(String loggingFilePathString, ScheduleService scheduleService) {
         this.loggingFilePathString = loggingFilePathString;
         this.loggingFilePath = Path.of(loggingFilePathString);
+        this.scheduleService = scheduleService;
         createLogFile();
     }
 
@@ -36,19 +39,16 @@ public class LogService {
         }
     }
 
-    public void logRegisterRecord(String channelID,
-                                  String txDayDate,
-                                  String startTime,
-                                  String durationTC) {
+    public void logRegisterRecord(Event event) {
         String logLine = "RECORD_REG - CH_ID: " +
-                channelID +
-                " TX_DAY_DATE: " +
-                txDayDate +
-                " START_TIME: " +
-                startTime +
-                " DURATION_TC: " +
-                durationTC +
-                ";";
+                scheduleService.getChannelId() +
+                ", TX_DAY_DATE: " +
+                scheduleService.getFormattedScheduleDay() +
+                ", START_TIME: " +
+                event.getStartTime().substring(0, 8) +
+                ", DURATION_TC: " +
+                event.getDurationTC().substring(0, 8) +
+                ";\n";
         addLogLine(logLine);
     }
 }

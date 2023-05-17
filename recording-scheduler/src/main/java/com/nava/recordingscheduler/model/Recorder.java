@@ -1,7 +1,6 @@
 package com.nava.recordingscheduler.model;
 
 import lombok.*;
-import org.moormanity.smpte.timecode.TimecodeRecord;
 
 import java.util.Set;
 
@@ -11,12 +10,16 @@ import java.util.Set;
 @Getter
 @Setter
 public class Recorder {
-    private TimecodeRecord recordStarted;
+    private RecordingTask currentRecordingTask;
     private boolean isRecording;
     private Set<RecordingTask> recordingTasks;
 
     public void addRecordingTask(RecordingTask recordingTask) {
-        recordingTasks.add(recordingTask);
+        if (currentRecordingTask == null) {
+            this.currentRecordingTask = recordingTask;
+        } else {
+            recordingTasks.add(recordingTask);
+        }
     }
 
     public void removeRecordingTask(RecordingTask recordingTask) {

@@ -11,10 +11,10 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
-public class ScheduleDTO {
+public class ScheduleDAO {
     private String txDayDate;
     private String channelID;
     @JsonIgnore
     private int alternative;
-    private Map<String, List<EventDTO>> eventList;
+    private Map<String, List<EventDAO>> eventList;
 }

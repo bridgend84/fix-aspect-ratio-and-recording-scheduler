@@ -18,7 +18,7 @@
     <div class="row gx-5">
         <div class="col">
             <div class="row justify-content-between">
-                <div th:text="${schedule}? ${schedule.txDayDate} : 'DATE'" class="col display-6"/>
+                <div th:text="${schedule}? ${schedule.formattedTxDayDate} : 'DATE'" class="col display-6"/>
                 <div th:text="${schedule}? ${schedule.channelID} : 'CHANNEL'" class="col display-6"/>
             </div>
             <table style="width:100%"
@@ -40,7 +40,7 @@
                     <td th:text="${event.programmeTitle}"></td>
                     <td>
                         <form action="#"
-                              th:action="@{/record(channelID=${schedule.channelID},txDayDate=${schedule.txDayDate},startTime=${event.startTime},durationTC=${event.durationTC})}" method="post">
+                              th:action="@{/record(startTime=${event.startTime})}" method="post">
                             <button type="submit" class="btn btn-danger" th:disabled="${!event.recordable}">Record</button>
                         </form>
                     </td>
