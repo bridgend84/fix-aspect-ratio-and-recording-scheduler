@@ -30,7 +30,7 @@ public class LogService {
                 Files.createFile(loggingFilePath);
             }
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error with path: " + e.getMessage());
         }
     }
 
@@ -38,7 +38,7 @@ public class LogService {
         try {
             Files.write(loggingFilePath, line.getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error with path: " + e.getMessage());
         }
     }
 

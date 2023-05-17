@@ -80,6 +80,9 @@ public class ScheduledRecordingService {
             String channelId = entry.getKey();
             Recorder recorder = entry.getValue();
             RecordingTask currentRecordingTask = recorder.getCurrentRecordingTask();
+            if (currentRecordingTask == null) {
+                return;
+            }
             if (!recorder.isRecording()) {
                 if (isItNowBySecond(currentRecordingTask.getScheduleDay(), currentRecordingTask.getStartTime())) {
                     int responseCode = sendRecordCommand(RecordCommand.START, channelId);
@@ -107,7 +110,7 @@ public class ScheduledRecordingService {
                                 channelId,
                                 convertToLocalDateTime(
                                         currentRecordingTask.getScheduleDay(),
-                                        currentRecordingTask.getStartTime()),
+                                        currentRecordingTask.getStopTime()),
                                 RecordCommand.STOP,
                                 responseCode);
                         recorder.setCurrentRecordingTask(null);
@@ -120,7 +123,7 @@ public class ScheduledRecordingService {
                                 channelId,
                                 convertToLocalDateTime(
                                         currentRecordingTask.getScheduleDay(),
-                                        currentRecordingTask.getStartTime()),
+                                        currentRecordingTask.getStopTime()),
                                 RecordCommand.STOP,
                                 responseCode);
                         recorder.discardCurrentAndCueNextTask();
