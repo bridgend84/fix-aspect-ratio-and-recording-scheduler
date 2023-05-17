@@ -54,5 +54,5 @@ java -jar target/recording-scheduler-0.0.1-SNAPSHOT.war
 ```
 Then the web application starts on http://localhost:8080/.
 
-<img src="image/app.jpg">
+<img alt="picture of app" src="image/app.jpg">
 In the large textbox you can paste proper json schedule, or you can upload one under it. For the text and the file upload there are dedicated buttons under the input fields. The schedule will be on the left side of the page. Only one schedule can be loaded at a time, and you can add a recording task, if you click the *Record* button next to the schedule event. After you clicked, the button will be disabled, because an event can be registered only once for recording.
