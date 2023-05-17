@@ -116,6 +116,6 @@ public class ScheduleService {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        return new File("src/main/resources/" + fileName);
+        return new File(scheduleJsonPathString + fileName);
     }
 }

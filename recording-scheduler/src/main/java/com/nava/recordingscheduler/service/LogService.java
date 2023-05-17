@@ -1,12 +1,15 @@
 package com.nava.recordingscheduler.service;
 
 import com.nava.recordingscheduler.model.Event;
+import com.nava.recordingscheduler.model.RecordCommand;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class LogService {
@@ -48,6 +51,21 @@ public class LogService {
                 event.getStartTime().substring(0, 8) +
                 ", DURATION_TC: " +
                 event.getDurationTC().substring(0, 8) +
+                ";\n";
+        addLogLine(logLine);
+    }
+
+    public void logCommand(String channelId, LocalDateTime realCurrentTime, RecordCommand command, int responseCode) {
+        String logLine = "RECORD_" +
+                command.name() +
+                " - CH_ID: " +
+                channelId +
+                ", DATE: " +
+                realCurrentTime.format(DateTimeFormatter.ISO_LOCAL_DATE) +
+                ", TIME: " +
+                realCurrentTime.format(DateTimeFormatter.ISO_LOCAL_TIME) +
+                ", RESPONSE: " +
+                responseCode +
                 ";\n";
         addLogLine(logLine);
     }

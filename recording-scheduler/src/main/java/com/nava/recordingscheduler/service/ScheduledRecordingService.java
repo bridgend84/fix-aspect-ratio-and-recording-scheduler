@@ -1,21 +1,28 @@
 package com.nava.recordingscheduler.service;
 
 import com.nava.recordingscheduler.model.Event;
+import com.nava.recordingscheduler.model.RecordCommand;
 import com.nava.recordingscheduler.model.Recorder;
 import com.nava.recordingscheduler.model.RecordingTask;
 import org.moormanity.smpte.timecode.FrameRate;
 import org.moormanity.smpte.timecode.TimecodeOperations;
+import org.moormanity.smpte.timecode.TimecodeRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.format.DateTimeFormatter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
 public class ScheduledRecordingService {
 
     private final ScheduleService scheduleService;
+
+    private final LogService logService;
 
     @Value("${recording.start.url}")
     private String startUrlWithoutChId;
@@ -33,9 +40,10 @@ public class ScheduledRecordingService {
 
     private final Map<String, Recorder> channelRecorders;
 
-    public ScheduledRecordingService(ScheduleService scheduleService, FrameRate fps) {
+    public ScheduledRecordingService(ScheduleService scheduleService, LogService logService, FrameRate fps) {
         this.channelRecorders = new HashMap<>();
         this.scheduleService = scheduleService;
+        this.logService = logService;
         this.fps = fps;
     }
 
@@ -66,14 +74,59 @@ public class ScheduledRecordingService {
                 .build());
     }
 
-    @Scheduled(fixedDelay = 30000)
-    public void printRecordingSchedule() {
-        if (channelRecorders.containsKey("D1")) {
-            channelRecorders.get("D1").getRecordingTasks().forEach(r -> {
-                System.out.println(r.getScheduleDay().format(DateTimeFormatter.ISO_DATE));
-                System.out.println(TimecodeOperations.toTimecodeString(r.getStartTime()));
-                System.out.println(TimecodeOperations.toTimecodeString(r.getStopTime()));
-            });
+    @Scheduled(fixedDelay = 1000)
+    public void commandScheduler() {
+        for (Map.Entry<String, Recorder> entry : channelRecorders.entrySet()) {
+            String channelId = entry.getKey();
+            Recorder recorder = entry.getValue();
+            if (!recorder.isRecording()) {
+                RecordingTask currentRecordingTask = recorder.getCurrentRecordingTask();
+                if (isItNowBySecond(currentRecordingTask.getScheduleDay(), currentRecordingTask.getStartTime())) {
+                    int responseCode = sendRecordCommand(RecordCommand.START, channelId);
+                    recorder.setRecording(true);
+                    logService.logCommand(
+                            channelId,
+                            convertToLocalDateTime(currentRecordingTask.getScheduleDay(), currentRecordingTask.getStartTime()),
+                            RecordCommand.START,
+                            responseCode);
+                }
+            }
         }
+    }
+
+    private boolean isItNowBySecond(LocalDateTime scheduleDay, TimecodeRecord timeCode) {
+        LocalDateTime taskLocalDateTime = LocalDateTime.of(
+                scheduleDay.getYear(),
+                scheduleDay.getMonth(),
+                scheduleDay.getDayOfMonth(),
+                timeCode.getHours(),
+                timeCode.getMinutes(),
+                timeCode.getSeconds());
+        return LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).equals(taskLocalDateTime);
+    }
+
+    private LocalDateTime convertToLocalDateTime (LocalDateTime scheduleDay, TimecodeRecord timeCode) {
+        return LocalDateTime.of(
+                scheduleDay.getYear(),
+                scheduleDay.getMonth(),
+                scheduleDay.getDayOfMonth(),
+                timeCode.getHours(),
+                timeCode.getMinutes(),
+                timeCode.getSeconds());
+    }
+
+    private int sendRecordCommand(RecordCommand command, String channelId) {
+        int responseStatus = 0;
+        try {
+            URL url = new URL(
+                    (command == RecordCommand.START ? startUrlWithoutChId : stopUrlWithoutChId) + channelId);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            responseStatus = con.getResponseCode();
+            con.disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return responseStatus;
     }
 }
