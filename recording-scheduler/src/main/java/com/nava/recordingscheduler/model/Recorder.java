@@ -2,7 +2,7 @@ package com.nava.recordingscheduler.model;
 
 import lombok.*;
 
-import java.util.Set;
+import java.util.TreeSet;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +12,7 @@ import java.util.Set;
 public class Recorder {
     private RecordingTask currentRecordingTask;
     private boolean isRecording;
-    private Set<RecordingTask> recordingTasks;
+    private TreeSet<RecordingTask> recordingTasks;
 
     public void addRecordingTask(RecordingTask recordingTask) {
         if (currentRecordingTask == null) {
@@ -22,7 +22,11 @@ public class Recorder {
         }
     }
 
-    public void removeRecordingTask(RecordingTask recordingTask) {
-        recordingTasks.remove(recordingTask);
+    public RecordingTask peekNextTask() {
+        return recordingTasks.isEmpty() ? null : recordingTasks.first();
+    }
+
+    public void discardCurrentAndCueNextTask() {
+        currentRecordingTask = recordingTasks.pollFirst();
     }
 }

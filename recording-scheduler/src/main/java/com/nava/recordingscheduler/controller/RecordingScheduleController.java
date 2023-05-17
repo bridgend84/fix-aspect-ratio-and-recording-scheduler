@@ -58,4 +58,10 @@ public class RecordingScheduleController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/test")
+    public String testTaskEndpoint(@RequestParam("task") String task, @RequestParam("ch") String ch) {
+        System.out.println(task + " command received on channel " + ch + ".");
+        return "redirect:/";
+    }
 }

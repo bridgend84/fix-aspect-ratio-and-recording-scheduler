@@ -79,16 +79,52 @@ public class ScheduledRecordingService {
         for (Map.Entry<String, Recorder> entry : channelRecorders.entrySet()) {
             String channelId = entry.getKey();
             Recorder recorder = entry.getValue();
+            RecordingTask currentRecordingTask = recorder.getCurrentRecordingTask();
             if (!recorder.isRecording()) {
-                RecordingTask currentRecordingTask = recorder.getCurrentRecordingTask();
                 if (isItNowBySecond(currentRecordingTask.getScheduleDay(), currentRecordingTask.getStartTime())) {
                     int responseCode = sendRecordCommand(RecordCommand.START, channelId);
                     recorder.setRecording(true);
                     logService.logCommand(
                             channelId,
-                            convertToLocalDateTime(currentRecordingTask.getScheduleDay(), currentRecordingTask.getStartTime()),
+                            convertToLocalDateTime(
+                                    currentRecordingTask.getScheduleDay(),
+                                    currentRecordingTask.getStartTime()),
                             RecordCommand.START,
                             responseCode);
+                }
+            } else {
+                if (isItNowBySecond(currentRecordingTask.getScheduleDay(), currentRecordingTask.getStopTime())) {
+                    LocalDateTime currentStop = convertToLocalDateTime(
+                            currentRecordingTask.getScheduleDay(),
+                            currentRecordingTask.getStopTime());
+                    LocalDateTime nextStart = recorder.peekNextTask() == null ? null : convertToLocalDateTime(
+                            recorder.peekNextTask().getScheduleDay(),
+                            recorder.peekNextTask().getStartTime());
+                    if (nextStart == null) {
+                        int responseCode = sendRecordCommand(RecordCommand.STOP, channelId);
+                        recorder.setRecording(false);
+                        logService.logCommand(
+                                channelId,
+                                convertToLocalDateTime(
+                                        currentRecordingTask.getScheduleDay(),
+                                        currentRecordingTask.getStartTime()),
+                                RecordCommand.STOP,
+                                responseCode);
+                        recorder.setCurrentRecordingTask(null);
+                    } else if (currentStop.isAfter(nextStart) || currentStop.isEqual(nextStart)) {
+                        recorder.discardCurrentAndCueNextTask();
+                    } else {
+                        int responseCode = sendRecordCommand(RecordCommand.STOP, channelId);
+                        recorder.setRecording(false);
+                        logService.logCommand(
+                                channelId,
+                                convertToLocalDateTime(
+                                        currentRecordingTask.getScheduleDay(),
+                                        currentRecordingTask.getStartTime()),
+                                RecordCommand.STOP,
+                                responseCode);
+                        recorder.discardCurrentAndCueNextTask();
+                    }
                 }
             }
         }
@@ -105,7 +141,7 @@ public class ScheduledRecordingService {
         return LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).equals(taskLocalDateTime);
     }
 
-    private LocalDateTime convertToLocalDateTime (LocalDateTime scheduleDay, TimecodeRecord timeCode) {
+    private LocalDateTime convertToLocalDateTime(LocalDateTime scheduleDay, TimecodeRecord timeCode) {
         return LocalDateTime.of(
                 scheduleDay.getYear(),
                 scheduleDay.getMonth(),
