@@ -1,5 +1,7 @@
-import sys
-import subprocess
+from sys import argv
+from subprocess import run
+from os.path import exists, dirname, isdir
+from os import access, W_OK
 
 def convert(inputURL, outputURL):
     command = [
@@ -15,10 +17,10 @@ def convert(inputURL, outputURL):
         '-s:v:1', '480x360',
         '-c:a:2', 'aac',
         '-b:a:2', '128k',
-        '-af:a:2', '"pan=stereo|FL=FR|FR=FR"',
+        '-af:a:2', 'pan=stereo|FL=FL|FR=FL',
         outputURL
     ]
-    subprocess.run(command)
+    return run(command)
 
 def process(fileURL):
     lines = []
@@ -27,12 +29,30 @@ def process(fileURL):
             lines.append(line.split())
     for io in lines:
         if len(io) != 2:
-            print('IO error')
+            print('\033[1;31;43m!!!SCRIPT ERROR!!! Illegal number of parameter in this line:' + ' '.join(io) + '\033[0;0m')
+            continue
+        elif exists(io[0]) != True:
+            print('\033[1;31;43m!!!SCRIPT ERROR!!! Input video file doesn\'t exists on this path:' + io[0] + '\033[0;0m')
+            continue
+        elif exists(io[1]):
+            print('\033[1;31;43m!!!SCRIPT ERROR!!! Output video file exists on this path:' + io[0] + '\033[0;0m')
+            continue
+        elif isdir(dirname(io[1])) != True:
+            print('\033[1;31;43m!!!SCRIPT ERROR!!! Output path doesn\'t exists:' + io[1] + '\033[0;0m')
+            continue
+        elif access(dirname(io[1]), W_OK) != True:
+            print('\033[1;31;43m!!!SCRIPT ERROR!!! Output path isn\'t writeable:' + io[1] + '\033[0;0m')
             continue
         else:
-            convert(io[0], io[1])  
+            result = convert(io[0], io[1])
+            if result.stderr != None:
+                print(result.stderr)
+            else:
+                print('\033[1;32;47m Video file converted succesfully to path: ' + io[1] + '\033[0;0m')
 
-if len(sys.argv) != 2:
-    print('Illegal parameter')
+if len(argv) != 2:
+    print('\033[1;31;43m!!!SCRIPT ERROR!!! Illegal number of input parameter.\033[0;0m')
+elif exists(argv[1]) != True:
+    print('\033[1;31;43m!!!SCRIPT ERROR!!! Input file doesn\'t exists.\033[0;0m')
 else:
-    process(sys.argv[1])
+    process(argv[1])
