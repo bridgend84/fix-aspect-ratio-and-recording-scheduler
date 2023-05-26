@@ -9,12 +9,13 @@ def convert(inputURL, outputURL):
         '-map', '0:a',
         '-c:v:0', 'libx264',
         '-b:v:0', '1.8M',
-        '-vf:v:0', 'scale=iw:ih',
+        '-vf:v:0', 'yadif',
         '-c:v:1', 'libx264',
         '-b:v:1', '0.75M',
         '-s:v:1', '480x360',
         '-c:a:2', 'aac',
         '-b:a:2', '128k',
+        '-af:a:2', '"pan=stereo|FL=FR|FR=FR"',
         outputURL
     ]
     subprocess.run(command)

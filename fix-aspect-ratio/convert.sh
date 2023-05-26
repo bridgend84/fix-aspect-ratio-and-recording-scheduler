@@ -1,1 +1,1 @@
-ffmpeg -i $1 -map 0:v -map 0:v -map 0:a -c:v:0 libx264 -b:v:0 1.8M -vf:v:0 scale=iw:ih -c:v:1 libx264 -b:v:1 0.75M -s:v:1 480x360 -c:a:2 aac -b:a:2 128k $2
+ffmpeg -i $1 -map 0:v -map 0:v -map 0:a -c:v:0 libx264 -b:v:0 1.8M -vf:v:0 yadif -c:v:1 libx264 -b:v:1 0.75M -s:v:1 480x360 -c:a:2 aac -b:a:2 128k -af:a:2 "pan=stereo|FL=FR|FR=FR" $2
