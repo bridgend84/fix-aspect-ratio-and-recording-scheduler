@@ -47,7 +47,7 @@ def process(fileURL):
             continue
         else:
             result = convert(io[0], io[1])
-            if result.stderr != None:
+            if result.stderr:
                 print(result.stderr)
             else:
                 print('\033[1;32;47m Video file converted succesfully to path: ' + io[1] + ' \033[0;0m')
